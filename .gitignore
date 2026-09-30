@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+
+# Android（与 create-lrc-player-android/.gitignore 保持一致）
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+
+# Python
+__pycache__/
+*.pyc

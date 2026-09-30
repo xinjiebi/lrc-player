@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lrcplayer-bridge</title>
+<style>
+  html,body{height:100%;margin:0;background:#000;overflow:hidden}
+  #stage{position:fixed;inset:0}
+</style>
+<script src="./lrc-player.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+'use strict';
+/* 原生 ↔ SDK 桥接页：原生侧通过 evaluateJavascript 调用 window.__native.*,
+   JS 侧通过 LrcPlayerNative.event(name, payload) 把事件抛回原生 */
+let player = null;
+
+/* 调试:把 JS 异常与 console 错误转发给原生(打 logcat) */
+window.onerror = (msg, src, line, col) => {
+  LrcPlayerNative.event('jserror', String(msg) + ' @' + String(src).split('/').pop() + ':' + line + ':' + col);
+};
+const _cerr = console.error.bind(console);
+console.error = (...a) => { LrcPlayerNative.event('jserror', a.map(String).join(' ')); _cerr(...a); };
+
+window.__native = {
+  async create(opts) {              // opts: {audioUrl, lrc, style?, mood?, seed?}
+    try {
+      if (player) { player.destroy(); player = null; }
+      player = await LrcPlayer.create('#stage', {
+        audio: opts.audioUrl,       // WebViewAssetLoader 映射的 https 本地 URL
+        lrc: opts.lrc,
+        fit: 'cover',               // 铺满容器并居中裁切(手机全面屏无黑边)
+        style: opts.style || undefined,
+        mood: opts.mood || undefined,
+        seed: opts.seed || undefined,
+        onLineChange: i => LrcPlayerNative.event('line', JSON.stringify({ index: i.index, text: i.text || '' })),
+        onAspect: a => LrcPlayerNative.event('aspect', a.aspect || ''),
+        onError: e => LrcPlayerNative.event('error', String(e && e.message || e)),
+      });
+      window.__player = player;
+      /* SDK 的 ready 在 create() 内部、Promise resolve 之前就发射了,
+         此时还没挂上监听器会错过,这里基于就绪后的状态补发一次 */
+      LrcPlayerNative.event('ready', JSON.stringify({
+        duration: player.duration, seed: (player.project && player.project.seed) || 0,
+      }));
+      player.on('ended', () => LrcPlayerNative.event('ended', ''));
+      player.on('play', () => LrcPlayerNative.event('state', 'play'));
+      player.on('pause', () => LrcPlayerNative.event('state', 'pause'));
+      player.on('reroll', r => LrcPlayerNative.event('reroll', JSON.stringify({ style: r.style, mood: r.mood })));
+      LrcPlayerNative.event('created', '');
+    } catch (e) {
+      LrcPlayerNative.event('error', String(e && e.message || e));
+    }
+  },
+  play()  { player && player.play().catch(() => {}); },
+  pause() { player && player.pause(); },
+  toggle() { if (!player) return; if (player.playing) player.pause(); else player.play().catch(() => {}); },
+  seek(t) { player && player.seek(t); },
+  reroll(style) { player && player.reroll(style ? { style } : undefined); },
+  destroy() { if (player) { player.destroy(); player = null; } },
+};
+</script>
+</body>
+</html>

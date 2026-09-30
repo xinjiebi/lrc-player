@@ -1,0 +1,289 @@
+{
+  "styles": [
+    {
+      "key": "noir",
+      "file": "noir.js",
+      "category": "基础",
+      "name": "黑白色差",
+      "bg": "#060607",
+      "fg": "#F5EEEA",
+      "accent": "#F5A50C",
+      "accent2": "#16F4D4"
+    },
+    {
+      "key": "crimson",
+      "file": "crimson.js",
+      "category": "基础",
+      "name": "深红信号",
+      "bg": "#C8103F",
+      "fg": "#FFFFFF",
+      "accent": "#140509",
+      "accent2": "#39F2C8"
+    },
+    {
+      "key": "caution",
+      "file": "caution.js",
+      "category": "基础",
+      "name": "警戒黄",
+      "bg": "#F4D21F",
+      "fg": "#141414",
+      "accent": "#E0231C",
+      "accent2": "#1F3FD8"
+    },
+    {
+      "key": "magenta",
+      "file": "magenta.js",
+      "category": "基础",
+      "name": "流行洋红",
+      "bg": "#FF0A8C",
+      "fg": "#FFFFFF",
+      "accent": "#FFFFFF",
+      "accent2": "#2B2BD9"
+    },
+    {
+      "key": "paper",
+      "file": "paper.js",
+      "category": "基础",
+      "name": "纸墨质感",
+      "bg": "#ECE9E3",
+      "fg": "#1B2350",
+      "accent": "#C2185B",
+      "accent2": "#111111"
+    },
+    {
+      "key": "hud",
+      "file": "hud.js",
+      "category": "基础",
+      "name": "暗色HUD",
+      "bg": "#131315",
+      "fg": "#EFEDEA",
+      "accent": "#F25A2B",
+      "accent2": "#FFFFFF"
+    },
+    {
+      "key": "mint",
+      "file": "mint.js",
+      "category": "基础",
+      "name": "薄荷终端",
+      "bg": "#0A0E0D",
+      "fg": "#E6FFF5",
+      "accent": "#9CFF3A",
+      "accent2": "#2E8C74"
+    },
+    {
+      "key": "specimen",
+      "file": "specimen.js",
+      "category": "基础",
+      "name": "样本注解",
+      "bg": "#1B1A1C",
+      "fg": "#F2F0EC",
+      "accent": "#F2F0EC",
+      "accent2": "#C8B98C"
+    },
+    {
+      "key": "transit",
+      "file": "transit.js",
+      "category": "基础",
+      "name": "交通标识",
+      "bg": "#5B582B",
+      "fg": "#FFFFFF",
+      "accent": "#E8C21A",
+      "accent2": "#1A1A1A"
+    },
+    {
+      "key": "blueprint",
+      "file": "blueprint.js",
+      "category": "基础",
+      "name": "蓝图纸",
+      "bg": "#1B1BE8",
+      "fg": "#FFFFFF",
+      "accent": "#000000",
+      "accent2": "#FFFFFF"
+    },
+    {
+      "key": "rouge",
+      "file": "rouge.js",
+      "category": "基础",
+      "name": "胭脂渐变",
+      "bg": "#E4E2E0",
+      "fg": "#141414",
+      "accent": "#D40F1C",
+      "accent2": "#141414"
+    },
+    {
+      "key": "mono",
+      "file": "mono.js",
+      "category": "基础",
+      "name": "单色RGB",
+      "bg": "#3B3D41",
+      "fg": "#FFFFFF",
+      "accent": "#FFFFFF",
+      "accent2": "#FFE34D"
+    },
+    {
+      "key": "hrRuin",
+      "file": "hrRuin.js",
+      "category": "恐怖",
+      "name": "恐怖·废墟",
+      "bg": "#161B18",
+      "fg": "#D3DACF",
+      "accent": "#B0473A",
+      "accent2": "#6E8B6B",
+      "common": true
+    },
+    {
+      "key": "hrNightRec",
+      "file": "hrNightRec.js",
+      "category": "恐怖",
+      "name": "恐怖·深夜录像",
+      "bg": "#050505",
+      "fg": "#EDEDED",
+      "accent": "#E3261E",
+      "accent2": "#FFFFFF",
+      "common": true
+    },
+    {
+      "key": "hrCurse",
+      "file": "hrCurse.js",
+      "category": "恐怖",
+      "name": "恐怖·诅咒信",
+      "bg": "#D8CBA4",
+      "fg": "#2A2017",
+      "accent": "#7E1410",
+      "accent2": "#3F3326",
+      "common": true
+    },
+    {
+      "key": "sakura",
+      "file": "sakura.js",
+      "category": "情绪化",
+      "name": "夜樱",
+      "bg": "#F8E4EB",
+      "fg": "#4A1434",
+      "accent": "#D93A74",
+      "accent2": "#6F8F4E",
+      "common": true
+    },
+    {
+      "key": "ocean",
+      "file": "ocean.js",
+      "category": "静谧",
+      "name": "深海",
+      "bg": "#031A2E",
+      "fg": "#E4FAFF",
+      "accent": "#1FD2E6",
+      "accent2": "#4C7DFF",
+      "common": true
+    },
+    {
+      "key": "sunset",
+      "file": "sunset.js",
+      "category": "情绪化",
+      "name": "晚霞渐变",
+      "bg": "#2A0F44",
+      "fg": "#FFF0DC",
+      "accent": "#FF7A30",
+      "accent2": "#FF4A86",
+      "common": true
+    },
+    {
+      "key": "forest",
+      "file": "forest.js",
+      "category": "静谧",
+      "name": "森之手帖",
+      "bg": "#1D291B",
+      "fg": "#EFE9D6",
+      "accent": "#B7C95A",
+      "accent2": "#C4833F",
+      "common": true
+    },
+    {
+      "key": "vapor",
+      "file": "vapor.js",
+      "category": "流行",
+      "name": "蒸汽波",
+      "bg": "#3A2A6E",
+      "fg": "#FFFFFF",
+      "accent": "#FF8FD8",
+      "accent2": "#7DF9FF",
+      "common": true
+    },
+    {
+      "key": "newsprint",
+      "file": "newsprint.js",
+      "category": "编辑排版",
+      "name": "报纸版面",
+      "bg": "#E6E5E0",
+      "fg": "#111111",
+      "accent": "#D8141B",
+      "accent2": "#0A82C8",
+      "common": true
+    },
+    {
+      "key": "synth80",
+      "file": "synth80.js",
+      "category": "流行",
+      "name": "合成器80s",
+      "bg": "#0B0414",
+      "fg": "#FF4FD8",
+      "accent": "#22E6FF",
+      "accent2": "#FFE45C",
+      "common": true
+    },
+    {
+      "key": "kraft",
+      "file": "kraft.js",
+      "category": "流行",
+      "name": "牛皮纸",
+      "bg": "#C49A6C",
+      "fg": "#1A1410",
+      "accent": "#B8361B",
+      "accent2": "#F3E9D2",
+      "common": true
+    },
+    {
+      "key": "candy",
+      "file": "candy.js",
+      "category": "流行",
+      "name": "糖果色",
+      "bg": "#BDF0E2",
+      "fg": "#3E2A8C",
+      "accent": "#EE3A88",
+      "accent2": "#FFB020",
+      "common": true
+    },
+    {
+      "key": "acid",
+      "file": "acid.js",
+      "category": "故障",
+      "name": "酸性设计",
+      "bg": "#050505",
+      "fg": "#C6FF00",
+      "accent": "#FF2BD6",
+      "accent2": "#FFFFFF",
+      "common": true
+    },
+    {
+      "key": "sumi",
+      "file": "sumi.js",
+      "category": "静谧",
+      "name": "墨与朱",
+      "bg": "#EFE5CF",
+      "fg": "#16130F",
+      "accent": "#B83A22",
+      "accent2": "#16130F",
+      "common": true
+    },
+    {
+      "key": "gold",
+      "file": "gold.js",
+      "category": "情绪化",
+      "name": "漆黑金箔",
+      "bg": "#0A0907",
+      "fg": "#F3E7C4",
+      "accent": "#D4AF37",
+      "accent2": "#F3E7C4",
+      "common": true
+    }
+  ]
+}

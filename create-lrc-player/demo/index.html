@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>create-lrc-player · 演示</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#000;overflow:hidden}
+  body{color:#eee;font-family:system-ui,-apple-system,"PingFang SC",sans-serif;
+       -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  /* 舞台 = 整个浏览器窗口；横竖屏由 ResizeObserver 自动适配重排 */
+  #stage{position:fixed;inset:0;background:#000;cursor:pointer}
+
+  /* 中央播控指示（播放/暂停闪显 + 就绪大按钮） */
+  #center{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  #center .disc{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.45);
+                display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff}
+  #center .disc.small{width:64px;height:64px;font-size:24px}
+  #center .wait{font-size:14px;opacity:.75;color:#fff;letter-spacing:.1em}
+  #center.flash .disc{animation:flashFade .7s forwards}
+  @keyframes flashFade{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(1.25)}}
+
+  /* 角落按钮 */
+  .pill{position:fixed;z-index:10;font:inherit;font-size:13px;color:#ddd;background:rgba(20,20,28,.55);
+        border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 16px;cursor:pointer;
+        backdrop-filter:blur(8px)}
+  .pill:hover{color:#fff;border-color:#888}
+  .pill:disabled{opacity:.35;cursor:default}
+  #btnPick{left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top))}
+  #btnReroll{right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top))}
+  #btnFull{right:max(12px,env(safe-area-inset-right));top:max(52px,calc(env(safe-area-inset-top) + 40px))}
+
+  /* 底部信息 + 进度条 */
+  #meta{position:fixed;left:50%;transform:translateX(-50%);bottom:max(18px,env(safe-area-inset-bottom));
+        z-index:9;font-size:12px;opacity:.55;text-align:center;pointer-events:none;max-width:90vw}
+  #prog{position:fixed;left:0;right:0;bottom:0;height:3px;z-index:9;background:rgba(255,255,255,.12)}
+  #prog i{display:block;height:100%;width:0;background:rgba(255,255,255,.75)}
+
+  /* 风格选择面板 */
+  #lookPanel{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(14,14,20,.92);backdrop-filter:blur(14px);
+             border-top:1px solid rgba(255,255,255,.12);border-radius:18px 18px 0 0;padding:16px 16px max(20px,env(safe-area-inset-bottom));
+             transform:translateY(105%);transition:transform .28s cubic-bezier(.3,.9,.3,1);max-height:62vh;overflow-y:auto}
+  #lookPanel.open{transform:translateY(0)}
+  #lookPanel h3{font-size:13px;letter-spacing:.15em;opacity:.55;font-weight:600;margin:4px 0 10px;display:flex;justify-content:space-between;align-items:center}
+  #lookPanel h3 button{font-size:16px;opacity:.7;padding:2px 10px}
+  .chipRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .mChip{font:inherit;font-size:12.5px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.2);
+         background:transparent;color:#ddd;cursor:pointer}
+  .mChip.on{background:#fff;color:#111;border-color:#fff;font-weight:700}
+  .sGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .sCell{position:relative;border-radius:10px;padding:10px 10px 8px;cursor:pointer;border:2px solid transparent;text-align:left;overflow:hidden}
+  .sCell .nm{font-size:12.5px;font-weight:700;line-height:1.3}
+  .sCell .bar{position:absolute;left:0;right:0;bottom:0;height:5px}
+  .sCell.on{border-color:#4da3ff;box-shadow:0 0 0 2px rgba(77,163,255,.35)}
+
+  #fFiles{display:none}
+  #dropTip{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;
+           background:rgba(0,0,0,.7);font-size:15px;letter-spacing:.1em;pointer-events:none}
+  body.dropping #dropTip{display:flex}
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+<div id="center"></div>
+<button class="pill" id="btnPick">🎵 选择歌曲</button>
+<button class="pill" id="btnReroll" disabled>✦ 换风格</button>
+<button class="pill" id="btnFull">⛶ 全屏</button>
+<div id="meta"></div>
+<div id="prog"><i></i></div>
+<div id="dropTip">松开以选择歌曲（一个音频 + 一个 LRC）</div>
+<div id="lookPanel">
+  <h3>风格选择 <button id="lookClose" aria-label="关闭">✕</button></h3>
+  <div class="chipRow" id="catRow"></div>
+  <div class="sGrid" id="styleGrid"></div>
+</div>
+<input type="file" id="fFiles" multiple accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.lrc,.txt">
+
+<script src="../dist/lrc-player.js"></script>
+<script>
+'use strict';
+if (!window.LrcPlayer) {
+  document.querySelector('#meta').textContent =
+    'SDK 未加载：请从项目根目录启动服务（python3 -m http.server 8080），然后访问 /demo/';
+  document.querySelector('#meta').style.color = '#f66';
+}
+const $ = s => document.querySelector(s);
+let player = null, creating = false;
+
+const isLrc = f => /\.(lrc|txt)$/i.test(f.name) || /text|lrc/i.test(f.type || '');
+
+/* 中央指示 */
+const center = $('#center');
+const showDisc = (icon, small) => center.innerHTML = `<div class="disc${small ? ' small' : ''}">${icon}</div>`;
+const showWait = t => center.innerHTML = `<div class="wait">${t}</div>`;
+const hideCenter = () => center.innerHTML = '';
+const flash = icon => {                       // 播放/暂停闪显（不影响点击）
+  showDisc(icon, true);
+  center.classList.remove('flash'); void center.offsetWidth;
+  center.classList.add('flash');
+};
+
+/* 文件入口：一次恰好两个文件 —— 一个音频 + 一个 LRC */
+$('#btnPick').addEventListener('click', e => { e.stopPropagation(); $('#fFiles').click(); });
+$('#fFiles').addEventListener('change', e => { takeFiles(e.target.files); e.target.value = ''; });
+['dragover', 'dragenter'].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); document.body.classList.add('dropping'); }));
+['dragleave', 'drop'].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); document.body.classList.remove('dropping'); }));
+window.addEventListener('drop', e => takeFiles(e.dataTransfer.files));
+
+async function takeFiles(list) {
+  const audios = [...list].filter(f => !isLrc(f));
+  const lrcs = [...list].filter(isLrc);
+  if (audios.length !== 1 || lrcs.length !== 1) {
+    info(`请一次选择两个文件：一个音频 + 一个 LRC（当前：音频 ${audios.length} 个，歌词 ${lrcs.length} 个）`);
+    if (!player) showDisc('▶');
+    return;
+  }
+  autoCreate(audios[0], await readLrc(lrcs[0]));
+}
+
+async function readLrc(file) {
+  const buf = await file.arrayBuffer();
+  let t = new TextDecoder('utf-8').decode(buf);
+  if (t.includes('�')) try { t = new TextDecoder('gbk').decode(buf); } catch {}
+  return t;
+}
+const info = t => { $('#meta').textContent = t; };
+
+/* 创建播放器（选歌后自动；同容器 create 会自动销毁旧实例） */
+async function autoCreate(audioFile, lrcText) {
+  if (creating) return;
+  creating = true;
+  showWait('准备中…');
+  $('#btnReroll').disabled = true;
+  try {
+    info('读取音频信息…');
+    player = await LrcPlayer.create('#stage', {
+      audio: audioFile,
+      lrc: lrcText,
+      onLineChange: i => { if (!creating) info(`第 ${i.index + 1} 句${i.text ? ' · ' + i.text : ''}`); },
+      onAspect: a => info('画面比 → ' + a.aspect),
+      onError: e => info('出错：' + e.message),
+      onLoading: s => info({ audio: '读取音频信息…', plan: '规划镜头…', fonts: '加载字体…' }[s.stage] || '…'),
+    });
+    player.on('bpm', b => info(`BPM 检测完成：约 ${Math.round(b.bpm)}`));
+    player.on('reroll', r => {
+      const sn = (LrcPlayer.STYLE_CN[r.style] || (J.STYLES[r.style] || {}).name || r.style), mn = (LrcPlayer.MOOD_CN[r.mood] || r.mood || '随机');
+      info(`风格：${sn} × ${mn}`);
+    });
+    player.on('ended', () => showDisc('▶'));
+    info(`就绪 · ${player.duration.toFixed(1)}s · 种子 ${player.project.seed} · 点击屏幕播放`);
+    window.__player = player;
+    $('#btnReroll').disabled = false;
+    showDisc('▶');
+  } catch (e) {
+    info('创建失败：' + (e && e.message || e));
+    showDisc('▶');
+  } finally { creating = false; }
+}
+
+/* 点击屏幕 = 播放/暂停（无播放器时 = 打开文件选择） */
+$('#stage').addEventListener('click', () => {
+  if (creating) return;
+  if (!player) { $('#fFiles').click(); return; }
+  if (player.playing) { player.pause(); flash('❚❚'); }
+  else { player.play().then(() => flash('▶')).catch(() => {}); }
+});
+
+/* ---- 风格选择面板（两级：分组 · 风格）+ 动态风格库 ---- */
+let selCat = '全部', selStyle = 'auto', libManifest = null, libLoading = null;
+const catRow = $('#catRow'), styleGrid = $('#styleGrid'), lookPanel = $('#lookPanel');
+
+/* 两级库渲染：以 styles/index.json 清单为准（元数据在清单里，代码按需下载）。
+   分类仅作为数据保留，面板不再显示分类标签，全部风格平铺在一个网格里 */
+const styleLoaded = k => !!(window.J && J.STYLES && J.STYLES[k]);
+function renderLibrary() {
+  const list = (libManifest && libManifest.styles) || [];
+  selCat = '全部';
+  catRow.style.display = 'none';
+
+  const items = list;
+  const cells = [`<button class="sCell${selStyle === 'auto' ? ' on' : ''}" data-style="auto" style="background:#222;color:#eee">`
+    + `<div class="nm">自动</div><div class="bar" style="background:linear-gradient(90deg,#f5a50c,#16f4d4,#e0231c,#1b1be8)"></div></button>`];
+  for (const st of items) {
+    const loaded = styleLoaded(st.key);
+    const mark = loaded ? '' : `<span style="position:absolute;top:6px;right:8px;font-size:9px;opacity:.65">⇩ ${st.size || ''}</span>`;
+    cells.push(`<button class="sCell${selStyle === st.key ? ' on' : ''}" data-style="${st.key}" style="background:${st.bg};color:${st.fg}">`
+      + `<div class="nm">${st.name}</div>${mark}<div class="bar" style="background:linear-gradient(90deg,${st.accent},${st.accent2})"></div></button>`);
+  }
+  styleGrid.innerHTML = cells.join('');
+}
+
+/* 拉取风格清单（内置 + 动态都在清单里；上传/删除只改服务器文件和清单） */
+async function ensureLibrary() {
+  if (libManifest) return;
+  if (!libLoading) libLoading = (async () => {
+    const merged = { styles: [] };
+    const add = (arr, dir) => { for (const st of arr || []) merged.styles.push(Object.assign({}, st, { _dir: dir })); };
+    try {
+      const res = await fetch('../dist/styles/index.json', { cache: 'no-cache' });
+      if (res.ok) add((await res.json()).styles, '../dist/styles/');
+    } catch (e) {}
+    try {
+      const res = await fetch('styles/index.json', { cache: 'no-cache' });
+      if (res.ok) add((await res.json()).styles, 'styles/');
+    } catch (e) {}
+    libManifest = merged;
+  })();
+  await libLoading;
+  renderLibrary();
+}
+
+const styleLoading = new Set();
+let commonLoaded = false;   // 共享部件包只下载一次
+async function pickStyle(key) {
+  if (!player || key === 'auto') { applyLook(); return; }
+  const st = ((libManifest || {}).styles || []).find(x => x.key === key);
+  if (st && !styleLoaded(key) && !styleLoading.has(key)) {
+    styleLoading.add(key);
+    info('下载风格：' + st.name + ' …');
+    try {
+      // 富风格依赖共享部件包 common.js（清单 common:true）——先确保它已加载
+      if (st.common && !commonLoaded) {
+        info('下载共享部件包（只需一次）…');
+        await LrcPlayer.loadStyle((st._dir || '') + 'common.js');
+        commonLoaded = true;
+      }
+      await LrcPlayer.loadStyle((st._dir || '') + st.file);
+    } catch (e) { info('风格下载失败：' + st.name); styleLoading.delete(key); return; }
+    styleLoading.delete(key);
+  }
+  selStyle = key;
+  renderLibrary();
+  applyLook();
+}
+
+function applyLook() {
+  if (!player) return;
+  player.reroll({ style: selStyle === 'auto' ? undefined : selStyle });
+}
+styleGrid.addEventListener('click', e => {
+  const b = e.target.closest('[data-style]'); if (!b) return;
+  selStyle = b.dataset.style;
+  styleGrid.querySelectorAll('.sCell').forEach(c => c.classList.toggle('on', c === b));
+  pickStyle(selStyle);
+});
+$('#btnReroll').addEventListener('click', e => {
+  e.stopPropagation();
+  lookPanel.classList.add('open');
+  renderLibrary();          // 先显示已注册风格
+  ensureLibrary();          // 再异步拉取风格清单
+});
+$('#lookClose').addEventListener('click', e => { e.stopPropagation(); lookPanel.classList.remove('open'); });
+$('#btnFull').addEventListener('click', e => {
+  e.stopPropagation();
+  document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+});
+
+/* 进度条 */
+setInterval(() => {
+  $('#prog i').style.width = (player && player.duration ? player.currentTime / player.duration * 100 : 0) + '%';
+}, 400);
+</script>
+</body>
+</html>

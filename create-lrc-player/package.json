@@ -1,0 +1,12 @@
+{
+  "name": "create-lrc-player",
+  "version": "0.1.0",
+  "description": "本地实时渲染的动态歌词播放器 SDK（基于 lrc-JIZURA 引擎裁剪，无服务器、无 MP4 生成、横竖屏自动重排）",
+  "main": "dist/lrc-player.js",
+  "scripts": {
+    "build": "python3 build.py",
+    "demo": "python3 -m http.server 8080"
+  },
+  "license": "MIT",
+  "devDependencies": {}
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 全屏播放器 + 两个浮动按钮:左上选歌、右上切换风格 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000">
+
+    <com.lrcplayer.LrcPlayerView
+        android:id="@+id/player"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/btnPick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="44dp"
+        android:alpha="0.75"
+        android:text="选歌" />
+
+    <Button
+        android:id="@+id/btnStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="44dp"
+        android:alpha="0.75"
+        android:text="风格" />
+
+    <!-- 暂停时显示的播放按钮(居中,半透明圆底) -->
+    <ImageButton
+        android:id="@+id/btnPlay"
+        android:layout_width="84dp"
+        android:layout_height="84dp"
+        android:layout_gravity="center"
+        android:background="@drawable/play_overlay"
+        android:contentDescription="播放"
+        android:visibility="gone" />
+</FrameLayout>

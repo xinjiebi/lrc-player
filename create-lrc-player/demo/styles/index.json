@@ -1,0 +1,6 @@
+{
+  "styles": [
+    { "key": "superSuck", "file": "superSuck.js", "category": "电子", "name": "超级吸入",
+      "bg": "#02020A", "fg": "#E8FBFF", "accent": "#00F0FF", "accent2": "#FF00E5" }
+  ]
+}

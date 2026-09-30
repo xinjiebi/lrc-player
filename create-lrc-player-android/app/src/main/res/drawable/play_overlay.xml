@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 暂停时的居中播放按钮:半透明黑圆底 + 白色播放三角 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="84dp"
+    android:height="84dp"
+    android:viewportWidth="84"
+    android:viewportHeight="84">
+    <!-- 圆底 -->
+    <path
+        android:fillColor="#66000000"
+        android:pathData="M42,42 m-42,0 a42,42 0 1,1 84,0 a42,42 0 1,1 -84,0" />
+    <!-- 播放三角 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,26 L60,42 L34,58 Z" />
+</vector>

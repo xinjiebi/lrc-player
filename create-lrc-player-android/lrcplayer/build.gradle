@@ -1,0 +1,32 @@
+// lrcplayer —— 动态歌词播放器 Android 壳（发布形态为 AAR）
+// 内含 WebView 封装 + 打包进 assets 的 JS SDK（通过 sync-sdk.sh 同步）
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.lrcplayer'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 24
+        targetSdk 34
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            consumerProguardFiles 'consumer-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+dependencies {
+    // WebViewAssetLoader：把 assets 映射成 https 本地域名（file:// 的安全替代）
+    implementation 'androidx.webkit:webkit:1.8.0'
+}
