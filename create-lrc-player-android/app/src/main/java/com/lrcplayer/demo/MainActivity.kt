@@ -15,7 +15,8 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * Demo：内置 9 首歌曲(assets/songs/,音频与 LRC 一一对应)。
+ * Demo:歌曲放在 assets/songs/(音频与 LRC 一一对应),因版权原因不随仓库分发,
+ * 打包前需自行放入,见 README「歌曲资源」。
  * 点「选歌」→ 列表只显示歌曲名 → 自动配对 LRC → 播放。
  */
 class MainActivity : AppCompatActivity() {
@@ -116,10 +117,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSongPicker() {
         val songs = loadSongs()
-        if (songs.isEmpty()) return toast("assets/songs 里没有歌曲")
+        if (songs.isEmpty()) return showNoSongsHint()
         AlertDialog.Builder(this)
             .setTitle("选择歌曲")
             .setItems(songs.map { it.title }.toTypedArray()) { _, which -> playSongAt(which) }
+            .show()
+    }
+
+    /* 打包后没有内置歌曲时,弹出面板引导用户放歌再重新打包 */
+    private fun showNoSongsHint() {
+        AlertDialog.Builder(this)
+            .setTitle("没有歌曲")
+            .setMessage(
+                "安装包中没有内置歌曲(歌曲因版权原因不随安装包分发)。\n\n" +
+                    "打包前请把歌曲文件(mp3 / aac / m4a / flac / ogg / wav)和同名的 " +
+                    ".lrc 歌词文件放入:\n\napp/src/main/assets/songs/\n\n然后重新打包安装即可。"
+            )
+            .setPositiveButton("知道了", null)
             .show()
     }
 

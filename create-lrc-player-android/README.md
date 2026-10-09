@@ -40,6 +40,21 @@ player.seek(12.5); player.reroll("ocean"); player.pause()
 override fun onDestroy() { player.release(); super.onDestroy() }
 ```
 
+## 歌曲资源
+
+歌曲因版权原因**不随仓库分发**,`app/src/main/assets/songs/` 已加入 `.gitignore`。
+
+打包 Demo 前,请自行把歌曲放入该目录:
+
+```
+app/src/main/assets/songs/
+├── 歌名-歌手.mp3      # 音频:mp3 / aac / m4a / flac / ogg / wav
+└── 歌名-歌手.lrc      # 同名 .lrc 歌词(与音频一一配对)
+```
+
+- 音频与同目录下**同名** `.lrc` 自动配对,缺少歌词的文件不会出现在选歌列表
+- 该目录为空时打包也能正常安装,只是 App 内点「选歌」会弹出提示面板,引导先放歌再重新打包
+
 ## 构建
 
 ```bash

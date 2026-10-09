@@ -4,3 +4,6 @@ local.properties
 *.iml
 .idea/
 .DS_Store
+
+# 歌曲涉及版权,不随仓库分发;打包前自行放入(见 README「歌曲资源」)
+app/src/main/assets/songs/
