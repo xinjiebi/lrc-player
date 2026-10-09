@@ -13,4 +13,7 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = 'create-lrc-player-android'
-include ':app', ':lrcplayer'
+include ':app'
+// SDK 已拆到仓库根目录的独立项目,作为模块引入(项目名保持 :lrcplayer,app 依赖不变)
+include ':lrcplayer'
+project(':lrcplayer').projectDir = new File('../lrcplayer-android-sdk')

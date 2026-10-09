@@ -1,44 +1,26 @@
 # create-lrc-player-android
 
-动态歌词播放器的 Android 壳 —— 把 [create-lrc-player](https://github.com/xinjiebi/lrc-JIZURA) 的 JS SDK
-封装成 **Android Library(AAR)**，宿主 App 一个 View 即可接入。
+动态歌词播放器的 Android **Demo 宿主** —— 演示如何接入 `lrcplayer-android-sdk`。
 
-## 架构
+- SDK 在仓库根目录的 [`lrcplayer-android-sdk/`](../lrcplayer-android-sdk)(纯 Android Library,
+  接入方式与 API 文档见该目录的 README)
+- 本目录通过 `settings.gradle` 以源码模块方式引入 SDK(`:lrcplayer` 指到 `../lrcplayer-android-sdk`)
 
-```
-宿主 App ── LrcPlayerView(自定义 View)── WebView ──┬─ assets/lrcplayer/  ← JS SDK(离线,1.6MB)
-                                                  └─ /audio/<file>      ← 当前歌曲文件(Range 支持)
-```
+## 运行
 
-- 资源走 `WebViewAssetLoader`，映射为 `https://appassets.androidplatform.net/...`，不用 file://，无跨域问题
-- 音频由壳映射成同域名 URL 交给 `<audio>` 播放，**seek 依赖的 HTTP Range(206)已支持**
-- 精简字体模式只依赖在线 Google Fonts；完全离线可另跑 `vendor-fonts.js` 把字体打进 assets(机制自动探测)
+用 Android Studio 打开本目录 → Sync → Run `app`。
 
-## 接入
+打包前记得先放歌曲,见下文「歌曲资源」。
 
-```groovy
-// settings.gradle
-include ':lrcplayer'
-project(':lrcplayer').projectDir = new File('../create-lrc-player-android/lrcplayer')
-// 或直接把 aar 放进 libs:implementation files('libs/lrcplayer-release.aar')
-```
+## 演示内容
 
-```xml
-<com.lrcplayer.LrcPlayerView
-    android:id="@+id/player"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
-```
+`app/src/main/java/com/lrcplayer/demo/MainActivity.kt` 覆盖了 SDK 的典型用法:
 
-```kotlin
-player.load(audioFile, lrcText)                 // File + LRC 文本;可选 style/mood/seed
-player.onReady = { duration, seed -> player.play() }
-player.onLineChange = { index, text -> /* 通知栏歌词等 */ }
-player.onEnded = { /* 下一首 */ }
-player.seek(12.5); player.reroll("ocean"); player.pause()
-// 销毁时必须:
-override fun onDestroy() { player.release(); super.onDestroy() }
-```
+- 从 `assets/songs/` 扫描音频并与同名 `.lrc` 配对
+- 「选歌」AlertDialog 列表选歌 → 拷到 `cacheDir` → `player.load()` 播放
+- 点封面播放/暂停(`onTap` + `toggle()`),上/下滑切歌(`onSwipeVertical`)
+- 「风格」列表切换动态风格(`reroll(style)`)
+- 无内置歌曲时弹出引导面板
 
 ## 歌曲资源
 
@@ -54,25 +36,3 @@ app/src/main/assets/songs/
 
 - 音频与同目录下**同名** `.lrc` 自动配对,缺少歌词的文件不会出现在选歌列表
 - 该目录为空时打包也能正常安装,只是 App 内点「选歌」会弹出提示面板,引导先放歌再重新打包
-
-## 构建
-
-```bash
-./sync-sdk.sh          # SDK 更新后同步 dist/ → assets(首次已执行)
-```
-
-用 Android Studio 打开本目录 → Sync → Run `app`。
-出 AAR:`Build > Make Module 'lrcplayer'`,产物在 `lrcplayer/build/outputs/aar/`。
-
-## 模块
-
-| 路径 | 说明 |
-|---|---|
-| `lrcplayer/` | 发布的 Library:`LrcPlayerView`(View+API)、`PlayerWebViewClient`(assets+音频拦截)、`BoundedInputStream`(Range)、assets 里的 JS SDK 与桥接页 |
-| `app/` | Demo 宿主:SAF 选歌 → 播放 |
-| `sync-sdk.sh` | dist/ → assets 同步脚本 |
-
-## 权限
-
-库清单已带 `INTERNET`(在线字体用)，随 Library 合并进宿主，无需手动声明。
-音频文件在 App 私有目录时**不需要任何存储权限**。
